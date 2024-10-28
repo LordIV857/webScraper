@@ -39,7 +39,7 @@ def scrape():
 
     return jsonify({
         #"headers": extracted_headers, 
-        "html_content": html_content
+        html_content
     })
 
 if __name__ == '__main__':
