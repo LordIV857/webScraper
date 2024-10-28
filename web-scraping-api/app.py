@@ -38,7 +38,7 @@ def scrape():
         })
 
     return jsonify({
-        "headers": extracted_headers, 
+        #"headers": extracted_headers, 
         "html_content": html_content
     })
 
