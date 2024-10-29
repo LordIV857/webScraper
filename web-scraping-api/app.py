@@ -28,19 +28,34 @@ def scrape():
     # Analyse le contenu HTML avec BeautifulSoup
     soup = BeautifulSoup(html_content, 'html.parser')
 
-    # Extraction des titres h1, h2, h3
-    headers = soup.find_all(['h1', 'h2', 'h3'])
-    extracted_headers = []
-    for header in headers:
-        extracted_headers.append({
-            "tag": header.name,
-            "text": header.get_text(strip=True)
-        })
+    # Extraction des liens et titres des articles contenant le mot "article" dans l'intégralité de la balise <a>
+    articles = []
+    seen_links = set()  # Ensemble pour garder une trace des liens uniques déjà ajoutés
+    for link in soup.find_all('a', href=True):  # Rechercher toutes les balises <a> avec un attribut href
+        full_a_content = str(link)  # Obtenir tout le contenu HTML de la balise <a>
 
-    return jsonify(
-        #"headers": extracted_headers, 
-        html_content
-    )
+        # Vérifie si le mot "article" est présent dans le contenu complet de <a>
+        if "article" in full_a_content.lower():
+            title = link.get_text(strip=True)  # Extraire le texte (titre) de la balise <a>
+            href = link['href']  # Extraire le lien (href) de la balise <a>
+            
+            # Vérifie si le lien a déjà été ajouté pour éviter les doublons
+            if href not in seen_links:
+                articles.append({
+                    "title": title,
+                    "link": href
+                })
+                seen_links.add(href)  # Ajouter le lien à l'ensemble des liens vus
+
+    # Récupère le type de réponse demandée
+    response_type = request.args.get('type', default='all')  # 'all' par défaut
+
+    if response_type == 'titles':
+        return jsonify([article['title'] for article in articles])  # Retourne seulement les titres
+    elif response_type == 'links':
+        return jsonify([article['link'] for article in articles])  # Retourne seulement les liens
+    else:
+        return jsonify(articles)  # Retourne les articles complets (titres et liens)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
