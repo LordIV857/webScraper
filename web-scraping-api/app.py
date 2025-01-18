@@ -25,6 +25,10 @@ def fetch_html(url):
 def scrape():
     url = request.args.get('url')  # Récupère l'URL depuis les paramètres de la requête
     keywords = request.args.get('type', '').lower().split(',')  # Récupère les mots-clés et les transforme en liste
+    
+    # Remplacer les antislashs par des slashs
+    url = url.replace('\\', '/')
+    
     html_content = fetch_html(url)
 
     # Analyse le contenu HTML avec BeautifulSoup
@@ -59,7 +63,7 @@ def scrape():
                         # Si l'image est dans srcset, on prend la première URL valide
                         if 'srcset' in img_tag.attrs:
                             # Récupérer toutes les URLs du srcset et les diviser par la virgule
-                            srcset_urls = img_tag['srcset'].split(',')
+                            srcset_urls = img_tag['srcset'].split(',') 
                             # Extraire la première URL dans srcset
                             image_url = srcset_urls[0].split(' ')[0].strip()
                         
